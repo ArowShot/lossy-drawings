@@ -1,0 +1,24 @@
+{
+  "name": "LossyDrawing",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "autoprefixer": "^9.1.5",
+    "node-sass": "^4.9.3",
+    "parcel-bundler": "^1.9.7",
+    "underscore": "^1.9.1"
+  },
+  "devDependencies": {
+    "eslint": "^5.5.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "postcss-modules": "^1.3.2"
+  }
+}
