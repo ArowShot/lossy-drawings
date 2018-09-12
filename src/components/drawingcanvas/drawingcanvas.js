@@ -60,8 +60,8 @@ export class DrawingCanvas extends HTMLElement {
   constructor() {
     super();
     this.lines = [];
-    this.drawcolor = 'black';
-    this.pensize = 12;
+    this.drawColor = 'black';
+    this.penSize = 12;
 
     const shadow = this.attachShadow({ mode: 'open' });
 
@@ -70,9 +70,17 @@ export class DrawingCanvas extends HTMLElement {
     canvas.height = 512;
     this.canvas = canvas;
 
+    canvas.addEventListener('mousewheel', (e) => {
+      e.preventDefault();
+      const multiplier = e.ctrlKey ? -80 : -4;
+      this.penSize += multiplier * (e.deltaY / 100);
+      this.penSize = Math.max(0, this.penSize);
+      this.renderDrawing();
+      console.log(e);
+    });
     canvas.addEventListener('mousedown', (e) => {
       this.drawing = true;
-      this.startLine(e);
+      this.startLine();
     });
     canvas.addEventListener('mouseup', () => {
       this.drawing = false;
@@ -86,12 +94,18 @@ export class DrawingCanvas extends HTMLElement {
     })
     // todo: add on connect; remove on disconnect
     this.moveListener = document.addEventListener('mousemove', (e) => {
+      const { x, y } = getMousePos(this.ctx.canvas, e);
+      this.mouseX = x;
+      this.mouseY = y;
+
       if (e.buttons === 0) {
         this.drawing = false;
       }
       if (this.drawing) {
-        this.continueLine(e);
+        this.continueLine();
       }
+      
+      this.renderDrawing();
     });
     this.ctx = canvas.getContext('2d');
 
@@ -111,11 +125,19 @@ export class DrawingCanvas extends HTMLElement {
     const palette = document.createElement('palette-picker');
     palette.setAttribute('palette', ['red', 'orange', 'yellow', 'lime', 'green', 'cyan', 'blue', 'purple', 'black'].join(';'));
     palette.addEventListener('selectcolor', (e) => {
-      this.drawcolor = e.detail.color;
+      this.drawColor = e.detail.color;
     });
+    window.p = palette;
+
+    const picker = document.createElement('color-picker');
+    picker.addEventListener('addcolor', (e) => {
+      palette.addColor(e.detail.color);
+    });
+    window.pi = picker;
 
     shadow.appendChild(style);
     shadow.appendChild(palette);
+    shadow.appendChild(picker);
     shadow.appendChild(canvas);
     shadow.appendChild(button);
   }
@@ -125,21 +147,15 @@ export class DrawingCanvas extends HTMLElement {
   //   this.ctx.fillText(this.getAttribute('text'), 10, 10);
   // }
 
-  startLine(e) {
-    const { x, y } = getMousePos(this.ctx.canvas, e);
-    this.lines.push(new LinePart(this.pensize, this.drawcolor));
-    this.lines[this.lines.length - 1].addPoint(
-      x,
-      y,
-    );
-    this.renderDrawing();
+  startLine() {
+    this.lines.push(new LinePart(this.penSize || 1, this.drawColor));
+    this.continueLine();
   }
 
-  continueLine(e) {
-    const { x, y } = getMousePos(this.ctx.canvas, e);
+  continueLine() {
     this.lines[this.lines.length - 1].addPoint(
-      x,
-      y,
+      this.mouseX,
+      this.mouseY,
     );
     this.renderDrawing();
   }
@@ -149,10 +165,24 @@ export class DrawingCanvas extends HTMLElement {
     this.renderDrawing();
   }
 
-  renderDrawing() {
+  renderDrawing(hideCursor) {
     this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
     this.lines.forEach((part) => {
       part.draw(this.ctx);
     });
+
+    if(!hideCursor) {
+      this.ctx.lineWidth = 1;
+
+      this.ctx.strokeStyle = 'black';
+      this.ctx.beginPath();
+      this.ctx.arc(this.mouseX, this.mouseY, (this.penSize/2)+1, 0, 2*Math.PI);
+      this.ctx.stroke();
+
+      this.ctx.strokeStyle = 'white';
+      this.ctx.beginPath();
+      this.ctx.arc(this.mouseX, this.mouseY, (this.penSize/2), 0, 2*Math.PI);
+      this.ctx.stroke();
+    }
   }
 }

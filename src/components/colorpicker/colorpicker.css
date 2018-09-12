@@ -1,11 +1,28 @@
-.palette {
+.colorpicker {
+    width: 64px;
+    height: 512px;
     display: flex;
     flex-direction: row;
-    width: 50%;
-    margin: 10px auto;
-    justify-content: space-around;
 }
 
-.palette > .color {
-    border: 2px solid white;
+.colorpicker > div {
+    margin-left: 4px;
+}
+
+.hslider {
+    height: 100%;
+    width: 16px;
+    background: linear-gradient(to top, hsl(0, 100%, 50%) 0%, hsl(72, 100%, 50%) 20%, hsl(144, 100%, 50%) 40%, hsl(216, 100%, 50%) 60%, hsl(288, 100%, 50%) 80%, hsl(360, 100%, 50%) 100%);
+}
+
+.sslider {
+    height: 100%;
+    width: 16px;
+    background: linear-gradient(to top, hsl(0, 0%, 50%) 0%, hsl(0, 100%, 50%) 100%);
+}
+
+.lslider {
+    height: 100%;
+    width: 16px;
+    background: linear-gradient(to top, hsl(0, 100%, 0%) 0%, hsl(0, 100%, 50%) 20%, hsl(0, 100%, 100%) 100%);
 }

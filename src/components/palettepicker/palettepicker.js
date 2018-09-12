@@ -47,8 +47,31 @@ export class PalettePicker extends HTMLElement {
   generatePalette() {
     this.palette = this.getAttribute('palette').split(';');
 
-    this.palette.forEach((color) => {
+    for(let i = 0; i < 32; i++) {
       const colorElement = document.createElement('div');
+
+      let color = 'rgba(0,0,0,0)';
+      if(this.palette[i]) {
+        color = this.palette[i];
+
+        colorElement.addEventListener('click', () => {
+          if(this.selectedColorElement) {
+            this.selectedColorElement.classList.remove('selected');
+          }
+          this.selectedcolor = color;
+          this.selectedColorElement = colorElement;
+          colorElement.classList.add('selected');
+  
+          this.dispatchEvent(new CustomEvent('selectcolor', {
+            detail: {
+              color,
+            },
+          }));
+        });
+      } else {
+        colorElement.setAttribute('disabled', '');
+      }
+
       colorElement.setAttribute('style', `background: ${color};`);
       colorElement.classList.add('color');
 
@@ -57,22 +80,15 @@ export class PalettePicker extends HTMLElement {
         colorElement.classList.add('selected');
       }
 
-      colorElement.addEventListener('click', () => {
-        if(this.selectedColorElement) {
-          this.selectedColorElement.classList.remove('selected');
-        }
-        this.selectedcolor = color;
-        this.selectedColorElement = colorElement;
-        colorElement.classList.add('selected');
-
-        this.dispatchEvent(new CustomEvent('selectcolor', {
-          detail: {
-            color,
-          },
-        }));
-      });
-
       this.container.appendChild(colorElement);
-    });
+    }
+  }
+
+  addColor(color) {
+    this.palette = this.getAttribute('palette').split(';');
+    
+    this.palette = [color, ...this.palette].splice(0, 32);
+
+    this.setAttribute('palette', this.palette.join(';'));
   }
 }

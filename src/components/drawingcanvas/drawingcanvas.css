@@ -5,6 +5,7 @@ canvas {
     margin: 10px auto 10px auto;
     background: white;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    cursor: none;
 }
 
 button {
@@ -27,6 +28,12 @@ button:hover {
 }
 
 palette-picker {
-    width: 50%;
-    margin: 10px auto;
+    padding-left: 64px;
+    display: block;
+    position: absolute;
+}
+
+color-picker {
+    position: absolute;
+    display: block;
 }
