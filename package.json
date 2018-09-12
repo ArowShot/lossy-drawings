@@ -1,5 +1,5 @@
 {
-  "name": "LossyDrawing",
+  "name": "lossy-drawings",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -12,7 +12,9 @@
   "dependencies": {
     "autoprefixer": "^9.1.5",
     "node-sass": "^4.9.3",
+    "normalize.css": "^8.0.0",
     "parcel-bundler": "^1.9.7",
+    "path-parser": "^4.2.0",
     "underscore": "^1.9.1"
   },
   "devDependencies": {
