@@ -1,0 +1,13 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans|Roboto');
+@import "normalize.css";
+
+body {
+    background: #ddd;
+    font-family: 'Roboto', sans-serif;
+}
+
+drawing-canvas {
+    display: block;
+    width: 90%;
+    margin: auto;
+}

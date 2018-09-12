@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * @license
  * Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
@@ -14,23 +15,42 @@
  * this.constructor so that the native HTMLElement constructor can access the
  * current under-construction element's definition.
  */
-(function() {
-    if (
-      // No Reflect, no classes, no need for shim because native custom elements
-      // require ES2015 classes or Reflect.
-      window.Reflect === undefined ||
-      window.customElements === undefined ||
-      // The webcomponentsjs custom elements polyfill doesn't require
-      // ES2015-compatible construction (`super()` or `Reflect.construct`).
-      window.customElements.hasOwnProperty('polyfillWrapFlushCallback')
-    ) {
-      return;
+(function () {
+  if (
+    // No Reflect, no classes, no need for shim because native custom elements
+    // require ES2015 classes or Reflect.
+    window.Reflect === undefined ||
+    window.customElements === undefined ||
+    // The webcomponentsjs custom elements polyfill doesn't require
+    // ES2015-compatible construction (`super()` or `Reflect.construct`).
+    window.customElements.hasOwnProperty('polyfillWrapFlushCallback')
+  ) {
+    return;
+  }
+  const BuiltInHTMLElement = HTMLElement;
+  window.HTMLElement = function HTMLElement() {
+    return Reflect.construct(BuiltInHTMLElement, [], this.constructor);
+  };
+  HTMLElement.prototype = BuiltInHTMLElement.prototype;
+  HTMLElement.prototype.constructor = HTMLElement;
+  Object.setPrototypeOf(HTMLElement, BuiltInHTMLElement);
+})();
+
+
+// https://stackoverflow.com/questions/4570093/how-to-get-notified-about-changes-of-the-history-via-history-pushstate
+(function (history) {
+  var pushState = history.pushState;
+  history.pushState = function (state) {
+    // ... whatever else you want to do
+    // maybe call onhashchange e.handler
+    const ts = pushState.apply(history, arguments);
+    
+    if (typeof history.onpushstate == "function") {
+      history.onpushstate({
+        state: state
+      });
     }
-    const BuiltInHTMLElement = HTMLElement;
-    window.HTMLElement = function HTMLElement() {
-      return Reflect.construct(BuiltInHTMLElement, [], this.constructor);
-    };
-    HTMLElement.prototype = BuiltInHTMLElement.prototype;
-    HTMLElement.prototype.constructor = HTMLElement;
-    Object.setPrototypeOf(HTMLElement, BuiltInHTMLElement);
-  })();
+
+    return ts;
+  };
+})(window.history);
