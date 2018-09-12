@@ -1518,6 +1518,10 @@ currently-unhandled@^0.4.1:
   dependencies:
     array-find-index "^1.0.1"
 
+custom-elements@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/custom-elements/-/custom-elements-1.0.2.tgz#09f2b0f8e9b82cb98e56ea9227941cfc1474c2a6"
+
 dashdash@^1.12.0:
   version "1.14.1"
   resolved "https://registry.yarnpkg.com/dashdash/-/dashdash-1.14.1.tgz#853cfa0f7cbe2fed5de20326b8dd581035f6e2f0"

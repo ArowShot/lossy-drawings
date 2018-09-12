@@ -1,0 +1,11 @@
+.palette {
+    display: flex;
+    flex-direction: row;
+    width: 50%;
+    margin: 10px auto;
+    justify-content: space-around;
+}
+
+.palette > .color {
+    border: 2px solid white;
+}

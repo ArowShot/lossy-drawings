@@ -73,18 +73,24 @@ export class DrawingCanvas extends HTMLElement {
     canvas.addEventListener('mousedown', (e) => {
       this.drawing = true;
       this.startLine(e);
-      this.renderDrawing();
     });
     canvas.addEventListener('mouseup', () => {
       this.drawing = false;
     });
-    document.addEventListener('mousemove', (e) => {
+    document.addEventListener('keydown', (e) => {
+      console.log(e);
+      if(e.key == "z" && e.ctrlKey) {
+        this.drawing = false;
+        this.undoLine();
+      }
+    })
+    // todo: add on connect; remove on disconnect
+    this.moveListener = document.addEventListener('mousemove', (e) => {
       if (e.buttons === 0) {
         this.drawing = false;
       }
       if (this.drawing) {
         this.continueLine(e);
-        this.renderDrawing();
       }
     });
     this.ctx = canvas.getContext('2d');
@@ -102,7 +108,11 @@ export class DrawingCanvas extends HTMLElement {
       }));
     });
 
-    const palette = this.generatePalette(['red', 'orange', 'yellow', 'lime', 'green', 'cyan', 'blue', 'purple', 'black']);
+    const palette = document.createElement('palette-picker');
+    palette.setAttribute('palette', ['red', 'orange', 'yellow', 'lime', 'green', 'cyan', 'blue', 'purple', 'black'].join(';'));
+    palette.addEventListener('selectcolor', (e) => {
+      this.drawcolor = e.detail.color;
+    });
 
     shadow.appendChild(style);
     shadow.appendChild(palette);
@@ -122,6 +132,7 @@ export class DrawingCanvas extends HTMLElement {
       x,
       y,
     );
+    this.renderDrawing();
   }
 
   continueLine(e) {
@@ -130,6 +141,12 @@ export class DrawingCanvas extends HTMLElement {
       x,
       y,
     );
+    this.renderDrawing();
+  }
+
+  undoLine() {
+    this.lines.splice(this.lines.length-1, 1);
+    this.renderDrawing();
   }
 
   renderDrawing() {
@@ -137,24 +154,5 @@ export class DrawingCanvas extends HTMLElement {
     this.lines.forEach((part) => {
       part.draw(this.ctx);
     });
-  }
-
-  generatePalette(colors) {
-    const container = document.createElement('div');
-    container.classList.add('palette');
-
-    colors.forEach((color) => {
-      const colorElement = document.createElement('div');
-      colorElement.setAttribute('style', `width: 20px;height: 20px;background: ${color};`);
-      colorElement.classList.add('color');
-
-      colorElement.addEventListener('click', () => {
-        this.drawcolor = color;
-      });
-
-      container.appendChild(colorElement);
-    });
-
-    return container;
   }
 }
