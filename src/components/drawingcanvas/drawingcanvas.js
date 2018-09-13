@@ -177,14 +177,14 @@ export default class DrawingCanvas extends HTMLElement {
         e.preventDefault();
         if (e.ctrlKey) {
           let currentLayer = this.layers[this.currentLayer]
-
           let thisLayer = this.layers[i]
 
           this.layers[this.currentLayer] = thisLayer
-
           this.layers[i] = currentLayer
 
           this.currentLayer = i;
+
+          this.renderDrawing({});
         }
         this.currentLayer = i;
         this.layerCanvases.forEach((ctx) => ctx.canvas.classList.remove('selected'));

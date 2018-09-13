@@ -29,29 +29,12 @@
 
 .sliders > div {
     margin-left: 4px;
-}
-
-.hslider {
     height: 100%;
     width: 16px;
-    background: linear-gradient(to bottom, hsl(0, 100%, 50%) 0%, hsl(72, 100%, 50%) 20%, hsl(144, 100%, 50%) 40%, hsl(216, 100%, 50%) 60%, hsl(288, 100%, 50%) 80%, hsl(360, 100%, 50%) 100%);
 }
-
-.hslider > .thumb {
+.sliders > div > .thumb {
     height: 16px;
     width: 16px;
     position: absolute;
     background: #fff;
-}
-
-.sslider {
-    height: 100%;
-    width: 16px;
-    background: linear-gradient(to top, hsl(0, 0%, 50%) 0%, hsl(0, 100%, 50%) 100%);
-}
-
-.lslider {
-    height: 100%;
-    width: 16px;
-    background: linear-gradient(to top, hsl(0, 100%, 0%) 0%, hsl(0, 100%, 50%) 20%, hsl(0, 100%, 100%) 100%);
 }
