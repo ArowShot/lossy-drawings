@@ -9,6 +9,7 @@ canvas {
     background: white;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
     cursor: none;
+    z-index: 10;
 }
 
 button {
@@ -31,7 +32,7 @@ button:hover {
 }
 
 palette-picker {
-    padding-left: 64px;
+    margin-left: 64px;
     display: block;
     position: absolute;
 }
@@ -39,4 +40,36 @@ palette-picker {
 color-picker {
     position: absolute;
     display: block;
+}
+
+.layers {
+    margin-left: 640px;
+    position: absolute;
+    display: grid;
+    grid-template-columns: 128px;
+    grid-auto-rows: 128px;
+}
+
+.layers > canvas {
+    margin: auto;
+    box-shadow: none;
+    width: 120px;
+    height: 120px;
+    cursor: default;
+    box-sizing: border-box;
+    border: 4px solid rgba(0,0,0, 0.4);
+    transition: 0.1s all;
+}
+
+.layers > canvas:hover {
+    transform: scale(1.02, 1.02);
+    /*
+    width: 120px;
+    height: 120px;
+    */
+}
+
+.layers > canvas.selected {
+    transform: scale(1.02, 1.02);
+    border: 4px solid rgba(255,0,0, 0.4);
 }

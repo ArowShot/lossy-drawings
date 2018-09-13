@@ -41,8 +41,6 @@ export class LinePart extends DrawingPart {
         ctx.lineTo(point[0], point[1]);
       });
 
-      console.log(ctx.strokeStyle, ctx.globalCompositeOperation);
-
       ctx.stroke();
       ctx.restore();
     }
@@ -68,7 +66,20 @@ export default class DrawingCanvas extends HTMLElement {
 
   constructor() {
     super();
-    this.lines = [];
+    this.undoHistory = [];
+    this.redoHistory = [];
+    this.layers = [[], [], [], []];
+    this.layerCanvases = [];
+    for(let i = 0; i < this.layers.length; i += 1) {
+      let layerCanvas = document.createElement('canvas');
+      layerCanvas.width = 512;
+      layerCanvas.height = 512;
+      layerCanvas.style.background = `url(${imageURL})`;
+      layerCanvas.style.backgroundSize = `8px`;
+      this.layerCanvases.push(layerCanvas.getContext('2d'));
+    }
+    this.currentLayer = 3;
+    //this.lines = [];
     this.drawColor = 'black';
     this.penSize = 12;
 
@@ -89,8 +100,7 @@ export default class DrawingCanvas extends HTMLElement {
       const multiplier = e.ctrlKey ? -80 : -4;
       this.penSize += multiplier * (e.deltaY / 100);
       this.penSize = Math.max(0, this.penSize);
-      this.renderDrawing();
-      console.log(e);
+      this.renderDrawing({});
     });
     canvas.addEventListener('mousedown', (e) => {
       e.preventDefault();
@@ -159,9 +169,37 @@ export default class DrawingCanvas extends HTMLElement {
     });
     window.pi = picker;
 
+    const layers = document.createElement('div');
+    layers.classList.add('layers');
+    for(let i = 0; i < this.layers.length; i += 1) {
+      let canvas = this.layerCanvases[i].canvas;
+      canvas.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        if (e.ctrlKey) {
+          let currentLayer = this.layers[this.currentLayer]
+
+          let thisLayer = this.layers[i]
+
+          this.layers[this.currentLayer] = thisLayer
+
+          this.layers[i] = currentLayer
+
+          this.currentLayer = i;
+        }
+        this.currentLayer = i;
+        this.layerCanvases.forEach((ctx) => ctx.canvas.classList.remove('selected'));
+        canvas.classList.add('selected');
+      })
+      if(this.currentLayer === i) {
+        canvas.classList.add('selected');
+      }
+      layers.appendChild(canvas);
+    }
+
     shadow.appendChild(style);
     shadow.appendChild(palette);
     shadow.appendChild(picker);
+    shadow.appendChild(layers);
     shadow.appendChild(canvas);
     shadow.appendChild(button);
   }
@@ -191,12 +229,15 @@ export default class DrawingCanvas extends HTMLElement {
   }
 
   startLine(color) {
-    this.lines.push(new LinePart(this.penSize || 1, color || this.drawColor));
+    const lines = this.layers[this.currentLayer];
+    lines.push(new LinePart(this.penSize || 1, color || this.drawColor));
+    this.undoHistory.push([this.currentLayer, lines.length-1]);
     this.continueLine();
   }
 
   continueLine() {
-    this.lines[this.lines.length - 1].addPoint(
+    const lines = this.layers[this.currentLayer];
+    lines[lines.length - 1].addPoint(
       this.mouseX,
       this.mouseY,
     );
@@ -204,19 +245,31 @@ export default class DrawingCanvas extends HTMLElement {
   }
 
   undoLine() {
-    this.lines.splice(this.lines.length - 1, 1);
+    let undo = this.undoHistory.pop();
+    let undoLine = this.layers[undo[0]].splice(undo[1], 1);
+
+    this.redoHistory.push([undo, undoLine]);
+
     this.renderDrawing({});
   }
 
   renderDrawing({ctx, bgColor, hideCursor}) {
     let target = ctx || this.ctx;
     target.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-    target.fillStyle = bgColor || this.bgcolor || 'white';
+    target.fillStyle = bgColor || this.bgColor || 'white';
     target.rect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
     target.fill();
-    this.lines.forEach((part) => {
-      part.draw(target, bgColor || this.bgcolor, this.transparencyPattern);
-    });
+    for(let i = this.layers.length - 1; i >= 0; i -= 1) {
+      let lines = this.layers[i];
+      let layerTarget = this.layerCanvases[i]
+
+      layerTarget.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+      lines.forEach((part) => {
+        part.draw(layerTarget, 'transparent', this.transparencyPattern);
+      });
+
+      target.drawImage(layerTarget.canvas, 0, 0);
+    }
 
     if (!hideCursor) {
       target.lineWidth = 1;
