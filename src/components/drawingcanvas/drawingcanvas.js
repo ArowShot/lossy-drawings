@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import imageURL from '../../../assets/transparency.png'
 
 const styles = fs.readFileSync(`${__dirname}/drawingcanvas.css`); // eslint-disable-line no-path-context, no-path-concat
 
@@ -20,8 +21,9 @@ export class LinePart extends DrawingPart {
     this.line.push([x, y]);
   }
 
-  draw(ctx, bgColor) {
+  draw(ctx, bgColor, transparencyTexture) {
     if (this.line.length > 0) {
+      ctx.save();
       ctx.beginPath();
 
       ctx.lineJoin = 'round';
@@ -29,13 +31,20 @@ export class LinePart extends DrawingPart {
       ctx.lineWidth = this.width;
       ctx.strokeStyle = this.color === 'background' ? bgColor : this.color;
 
+      if(ctx.strokeStyle === 'rgba(0, 0, 0, 0)') {
+        ctx.strokeStyle = transparencyTexture;
+        ctx.globalCompositeOperation = 'destination-out';
+      }
+
       ctx.moveTo(this.line[0][0], this.line[0][1]);
       this.line.forEach((point) => {
         ctx.lineTo(point[0], point[1]);
       });
 
-      // ctx.closePath();
+      console.log(ctx.strokeStyle, ctx.globalCompositeOperation);
+
       ctx.stroke();
+      ctx.restore();
     }
   }
 }
@@ -115,7 +124,7 @@ export default class DrawingCanvas extends HTMLElement {
         this.continueLine();
       }
 
-      this.renderDrawing();
+      this.renderDrawing({});
     });
     this.ctx = canvas.getContext('2d');
 
@@ -146,6 +155,7 @@ export default class DrawingCanvas extends HTMLElement {
     picker.addEventListener('addcolor', (e) => {
       palette.selectedColor = e.detail.color;
       palette.addColor(e.detail.color);
+      this.drawColor = e.detail.color;
     });
     window.pi = picker;
 
@@ -167,8 +177,17 @@ export default class DrawingCanvas extends HTMLElement {
     this.setAttribute('bgcolor', color);
   }
 
+  connectedCallback() {
+    this.transparencyPattern = 'white';
+    let img = new Image();
+    img.src = imageURL;
+    img.onload = () => {
+      this.transparencyPattern = this.ctx.createPattern(img, 'repeat')
+    };
+  }
+
   attributeChangedCallback() {
-    this.renderDrawing();
+    this.renderDrawing({});
   }
 
   startLine(color) {
@@ -181,35 +200,36 @@ export default class DrawingCanvas extends HTMLElement {
       this.mouseX,
       this.mouseY,
     );
-    this.renderDrawing();
+    this.renderDrawing({});
   }
 
   undoLine() {
     this.lines.splice(this.lines.length - 1, 1);
-    this.renderDrawing();
+    this.renderDrawing({});
   }
 
-  renderDrawing(hideCursor) {
-    this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-    this.ctx.fillStyle = this.bgColor || 'white';
-    this.ctx.rect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-    this.ctx.fill();
+  renderDrawing({ctx, bgColor, hideCursor}) {
+    let target = ctx || this.ctx;
+    target.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+    target.fillStyle = bgColor || this.bgcolor || 'white';
+    target.rect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+    target.fill();
     this.lines.forEach((part) => {
-      part.draw(this.ctx, this.bgColor);
+      part.draw(target, bgColor || this.bgcolor, this.transparencyPattern);
     });
 
     if (!hideCursor) {
-      this.ctx.lineWidth = 1;
+      target.lineWidth = 1;
 
-      this.ctx.strokeStyle = 'black';
-      this.ctx.beginPath();
-      this.ctx.arc(this.mouseX, this.mouseY, (this.penSize / 2) + 1, 0, 2 * Math.PI);
-      this.ctx.stroke();
+      target.strokeStyle = 'black';
+      target.beginPath();
+      target.arc(this.mouseX, this.mouseY, (this.penSize / 2) + 1, 0, 2 * Math.PI);
+      target.stroke();
 
-      this.ctx.strokeStyle = 'white';
-      this.ctx.beginPath();
-      this.ctx.arc(this.mouseX, this.mouseY, (this.penSize / 2), 0, 2 * Math.PI);
-      this.ctx.stroke();
+      target.strokeStyle = 'white';
+      target.beginPath();
+      target.arc(this.mouseX, this.mouseY, (this.penSize / 2), 0, 2 * Math.PI);
+      target.stroke();
     }
   }
 }
