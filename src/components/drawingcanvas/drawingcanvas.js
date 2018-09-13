@@ -179,11 +179,7 @@ export default class DrawingCanvas extends HTMLElement {
       canvas.addEventListener('mousedown', (e) => {
         e.preventDefault();
         if (e.ctrlKey) {
-          let currentLayer = this.layers[this.currentLayer]
-          let thisLayer = this.layers[i]
-
-          this.layers[this.currentLayer] = thisLayer
-          this.layers[i] = currentLayer
+          this.swapLayers(i, this.currentLayer);
 
           this.currentLayer = i;
 
@@ -245,6 +241,30 @@ export default class DrawingCanvas extends HTMLElement {
       this.mouseY,
     );
     this.renderDrawing({});
+  }
+
+  swapLayers(layer1, layer2) {
+    let currentLayer = this.layers[layer1]
+    let thisLayer = this.layers[layer2]
+
+    this.layers[layer1] = thisLayer
+    this.layers[layer2] = currentLayer
+
+    this.undoHistory.forEach((undo) => {
+      if (undo[0] == layer1) {
+        undo[0] = layer2
+      } else if (undo[0] == layer2) {
+        undo[0] = layer1
+      }
+    });
+
+    this.redoHistory.forEach((redo) => {
+      if (redo[0] == layer1) {
+        redo[0] = layer2
+      } else if (redo[0] == layer2) {
+        redo[0] = layer1
+      }
+    });
   }
 
   undoLine() {
