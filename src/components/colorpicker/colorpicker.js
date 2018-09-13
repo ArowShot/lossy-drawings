@@ -12,21 +12,64 @@ export default class ColorPicker extends HTMLElement {
     const style = document.createElement('style');
     style.textContent = styles;
 
-    const container = document.createElement('div');
-    container.classList.add('colorpicker');
 
+    const colorPicker = document.createElement('div');
+    colorPicker.classList.add('colorpicker');
+
+    const sliders = document.createElement('div');
+    sliders.classList.add('sliders');
+
+    this.hue = 0;
     const hSlider = document.createElement('div');
     hSlider.classList.add('hslider');
-    const sSlider = document.createElement('div');
-    sSlider.classList.add('sslider');
-    const lSlider = document.createElement('div');
-    lSlider.classList.add('lslider');
 
-    container.appendChild(hSlider);
-    container.appendChild(sSlider);
-    container.appendChild(lSlider);
+    const hSliderThumb = document.createElement('div');
+    hSliderThumb.classList.add('thumb');
+    hSliderThumb.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      const picker = this;
+      document.addEventListener('mousemove', function moveListener(movee) {
+        const rect = hSlider.getBoundingClientRect();
+        let percentage = (movee.clientY - rect.top - (rect.width / 2)) / (rect.height - rect.width);
+        percentage = Math.min(Math.max(percentage, 0), 1);
+        hSliderThumb.setAttribute('style', `top:${percentage * (rect.height - rect.width)}px;`);
+        picker.hue = percentage * 360;
+
+        if (movee.buttons === 0) {
+          document.removeEventListener('mousemove', moveListener);
+        }
+      });
+    });
+    hSlider.appendChild(hSliderThumb);
+
+    this.sat = 100;
+    this.sSlider = document.createElement('div');
+    this.sSlider.classList.add('sslider');
+
+    this.lit = 50;
+    this.lSlider = document.createElement('div');
+    this.lSlider.classList.add('lslider');
+
+    const outColor = document.createElement('div');
+    outColor.classList.add('outcolor');
+    outColor.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+
+      this.dispatchEvent(new CustomEvent('addcolor', {
+        detail: {
+          color: `hsl(${this.hue}, 100%, 50%)`,
+        },
+      }));
+    });
+
+    sliders.appendChild(hSlider);
+    sliders.appendChild(this.sSlider);
+    sliders.appendChild(this.lSlider);
+
+    colorPicker.appendChild(sliders);
+    colorPicker.appendChild(outColor);
 
     shadow.appendChild(style);
-    shadow.appendChild(container);
+    shadow.appendChild(colorPicker);
   }
 }

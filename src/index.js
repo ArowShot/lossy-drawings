@@ -1,9 +1,9 @@
 // import Path from 'path-parser';
 // import 'custom-elements'; // polyfill (somehow breaks stuff)
 import './native-shim';
-import { DrawingCanvas } from './components/drawingcanvas/drawingcanvas';
-import { PalettePicker } from './components/palettepicker/palettepicker';
-import { ColorPicker } from './components/colorpicker/colorpicker';
+import DrawingCanvas from './components/drawingcanvas/drawingcanvas';
+import PalettePicker from './components/palettepicker/palettepicker';
+import ColorPicker from './components/colorpicker/colorpicker';
 
 customElements.define('drawing-canvas', DrawingCanvas);
 customElements.define('palette-picker', PalettePicker);

@@ -51,19 +51,30 @@ export default class PalettePicker extends HTMLElement {
       if (this.palette[i]) {
         color = this.palette[i];
 
-        colorElement.addEventListener('click', () => {
-          if (this.selectedColorElement) {
-            this.selectedColorElement.classList.remove('selected');
-          }
-          this.selectedcolor = color;
-          this.selectedColorElement = colorElement;
-          colorElement.classList.add('selected');
+        colorElement.addEventListener('contextmenu', e => e.preventDefault());
+        colorElement.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          console.log(e);
+          if (e.button === 0) {
+            if (this.selectedColorElement) {
+              this.selectedColorElement.classList.remove('selected');
+            }
+            this.selectedColor = color;
+            this.selectedColorElement = colorElement;
+            colorElement.classList.add('selected');
 
-          this.dispatchEvent(new CustomEvent('selectcolor', {
-            detail: {
-              color,
-            },
-          }));
+            this.dispatchEvent(new CustomEvent('selectcolor', {
+              detail: {
+                color,
+              },
+            }));
+          } else if (e.button === 2) {
+            this.dispatchEvent(new CustomEvent('selectbgcolor', {
+              detail: {
+                color,
+              },
+            }));
+          }
         });
       } else {
         colorElement.setAttribute('disabled', '');
@@ -72,7 +83,7 @@ export default class PalettePicker extends HTMLElement {
       colorElement.setAttribute('style', `background: ${color};`);
       colorElement.classList.add('color');
 
-      if (this.selectedcolor === color) {
+      if (this.selectedColor === color) {
         this.selectedColorElement = colorElement;
         colorElement.classList.add('selected');
       }

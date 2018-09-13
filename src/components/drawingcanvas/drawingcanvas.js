@@ -20,14 +20,14 @@ export class LinePart extends DrawingPart {
     this.line.push([x, y]);
   }
 
-  draw(ctx) {
+  draw(ctx, bgColor) {
     if (this.line.length > 0) {
       ctx.beginPath();
 
       ctx.lineJoin = 'round';
       ctx.lineCap = 'round';
       ctx.lineWidth = this.width;
-      ctx.strokeStyle = this.color;
+      ctx.strokeStyle = this.color === 'background' ? bgColor : this.color;
 
       ctx.moveTo(this.line[0][0], this.line[0][1]);
       this.line.forEach((point) => {
@@ -54,7 +54,7 @@ function getMousePos(canvas, evt) {
 
 export default class DrawingCanvas extends HTMLElement {
   static get observedAttributes() {
-    return ['text'];
+    return ['bgcolor'];
   }
 
   constructor() {
@@ -70,6 +70,11 @@ export default class DrawingCanvas extends HTMLElement {
     canvas.height = 512;
     this.canvas = canvas;
 
+    canvas.addEventListener('contextmenu', (e) => {
+      if (!e.ctrlKey) {
+        e.preventDefault();
+      }
+    });
     canvas.addEventListener('mousewheel', (e) => {
       e.preventDefault();
       const multiplier = e.ctrlKey ? -80 : -4;
@@ -78,9 +83,14 @@ export default class DrawingCanvas extends HTMLElement {
       this.renderDrawing();
       console.log(e);
     });
-    canvas.addEventListener('mousedown', () => {
+    canvas.addEventListener('mousedown', (e) => {
+      e.preventDefault();
       this.drawing = true;
-      this.startLine();
+      if (e.button === 2) {
+        this.startLine('background');
+      } else {
+        this.startLine();
+      }
     });
     canvas.addEventListener('mouseup', () => {
       this.drawing = false;
@@ -123,14 +133,18 @@ export default class DrawingCanvas extends HTMLElement {
     });
 
     const palette = document.createElement('palette-picker');
-    palette.setAttribute('palette', ['red', 'orange', 'yellow', 'lime', 'green', 'cyan', 'blue', 'purple', 'black'].join(';'));
+    palette.setAttribute('palette', ['red', 'orange', 'yellow', 'lime', 'green', 'cyan', 'blue', 'purple', 'pink', 'black', 'gray', 'white'].join(';'));
     palette.addEventListener('selectcolor', (e) => {
       this.drawColor = e.detail.color;
+    });
+    palette.addEventListener('selectbgcolor', (e) => {
+      this.bgColor = e.detail.color;
     });
     window.p = palette;
 
     const picker = document.createElement('color-picker');
     picker.addEventListener('addcolor', (e) => {
+      palette.selectedColor = e.detail.color;
       palette.addColor(e.detail.color);
     });
     window.pi = picker;
@@ -142,13 +156,23 @@ export default class DrawingCanvas extends HTMLElement {
     shadow.appendChild(button);
   }
 
-  // connectedCallback() {
-  //   this.ctx.fillStyle = 'black';
-  //   this.ctx.fillText(this.getAttribute('text'), 10, 10);
-  // }
+  get bgColor() {
+    if (this.hasAttribute('bgcolor')) {
+      return this.getAttribute('bgcolor');
+    }
+    return 'white';
+  }
 
-  startLine() {
-    this.lines.push(new LinePart(this.penSize || 1, this.drawColor));
+  set bgColor(color) {
+    this.setAttribute('bgcolor', color);
+  }
+
+  attributeChangedCallback() {
+    this.renderDrawing();
+  }
+
+  startLine(color) {
+    this.lines.push(new LinePart(this.penSize || 1, color || this.drawColor));
     this.continueLine();
   }
 
@@ -167,8 +191,11 @@ export default class DrawingCanvas extends HTMLElement {
 
   renderDrawing(hideCursor) {
     this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+    this.ctx.fillStyle = this.bgColor || 'white';
+    this.ctx.rect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+    this.ctx.fill();
     this.lines.forEach((part) => {
-      part.draw(this.ctx);
+      part.draw(this.ctx, this.bgColor);
     });
 
     if (!hideCursor) {
