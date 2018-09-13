@@ -118,6 +118,9 @@ export default class DrawingCanvas extends HTMLElement {
       if (e.key === 'z' && e.ctrlKey) {
         this.drawing = false;
         this.undoLine();
+      } else if (e.key === 'y' && e.ctrlKey) {
+        this.drawing = false;
+        this.redoLine();
       }
     });
 
@@ -246,11 +249,24 @@ export default class DrawingCanvas extends HTMLElement {
 
   undoLine() {
     let undo = this.undoHistory.pop();
-    let undoLine = this.layers[undo[0]].splice(undo[1], 1);
+    if(undo) {
+      let undoLine = this.layers[undo[0]].splice(undo[1], 1);
 
-    this.redoHistory.push([undo, undoLine]);
+      this.redoHistory.push([undo[0], ...undoLine]);
 
-    this.renderDrawing({});
+      this.renderDrawing({});
+    }
+  }
+  
+  redoLine() {
+    let redo = this.redoHistory.pop();
+    if(redo) {
+      this.layers[redo[0]].push(redo[1]);
+
+      this.undoHistory.push([redo[0], this.layers[redo[0]].length - 1]);
+
+      this.renderDrawing({});
+    }
   }
 
   renderDrawing({ctx, bgColor, hideCursor}) {
