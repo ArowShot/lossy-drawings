@@ -1,4 +1,7 @@
-@import url('https://fonts.googleapis.com/css?family=Open+Sans|Roboto');
+:root {
+    width: 768px;
+}
+
 canvas {
     /* border: 1px solid black; */
     display: block;

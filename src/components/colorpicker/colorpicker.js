@@ -3,8 +3,7 @@ import * as fs from 'fs';
 const styles = fs.readFileSync(`${__dirname}/colorpicker.css`); // eslint-disable-line no-path-context, no-path-concat
 
 
-export class ColorPicker extends HTMLElement {
-
+export default class ColorPicker extends HTMLElement {
   constructor() {
     super();
 

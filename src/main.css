@@ -8,6 +8,6 @@ body {
 
 drawing-canvas {
     display: block;
-    width: 90%;
+    width: 768px;
     margin: auto;
 }

@@ -52,7 +52,7 @@ function getMousePos(canvas, evt) {
 }
 
 
-export class DrawingCanvas extends HTMLElement {
+export default class DrawingCanvas extends HTMLElement {
   static get observedAttributes() {
     return ['text'];
   }
@@ -78,7 +78,7 @@ export class DrawingCanvas extends HTMLElement {
       this.renderDrawing();
       console.log(e);
     });
-    canvas.addEventListener('mousedown', (e) => {
+    canvas.addEventListener('mousedown', () => {
       this.drawing = true;
       this.startLine();
     });
@@ -86,12 +86,12 @@ export class DrawingCanvas extends HTMLElement {
       this.drawing = false;
     });
     document.addEventListener('keydown', (e) => {
-      console.log(e);
-      if(e.key == "z" && e.ctrlKey) {
+      if (e.key === 'z' && e.ctrlKey) {
         this.drawing = false;
         this.undoLine();
       }
-    })
+    });
+
     // todo: add on connect; remove on disconnect
     this.moveListener = document.addEventListener('mousemove', (e) => {
       const { x, y } = getMousePos(this.ctx.canvas, e);
@@ -104,7 +104,7 @@ export class DrawingCanvas extends HTMLElement {
       if (this.drawing) {
         this.continueLine();
       }
-      
+
       this.renderDrawing();
     });
     this.ctx = canvas.getContext('2d');
@@ -161,7 +161,7 @@ export class DrawingCanvas extends HTMLElement {
   }
 
   undoLine() {
-    this.lines.splice(this.lines.length-1, 1);
+    this.lines.splice(this.lines.length - 1, 1);
     this.renderDrawing();
   }
 
@@ -171,17 +171,17 @@ export class DrawingCanvas extends HTMLElement {
       part.draw(this.ctx);
     });
 
-    if(!hideCursor) {
+    if (!hideCursor) {
       this.ctx.lineWidth = 1;
 
       this.ctx.strokeStyle = 'black';
       this.ctx.beginPath();
-      this.ctx.arc(this.mouseX, this.mouseY, (this.penSize/2)+1, 0, 2*Math.PI);
+      this.ctx.arc(this.mouseX, this.mouseY, (this.penSize / 2) + 1, 0, 2 * Math.PI);
       this.ctx.stroke();
 
       this.ctx.strokeStyle = 'white';
       this.ctx.beginPath();
-      this.ctx.arc(this.mouseX, this.mouseY, (this.penSize/2), 0, 2*Math.PI);
+      this.ctx.arc(this.mouseX, this.mouseY, (this.penSize / 2), 0, 2 * Math.PI);
       this.ctx.stroke();
     }
   }

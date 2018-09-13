@@ -3,7 +3,7 @@ import * as fs from 'fs';
 const styles = fs.readFileSync(`${__dirname}/palettepicker.css`); // eslint-disable-line no-path-context, no-path-concat
 
 
-export class PalettePicker extends HTMLElement {
+export default class PalettePicker extends HTMLElement {
   static get observedAttributes() {
     return ['palette'];
   }
@@ -17,10 +17,7 @@ export class PalettePicker extends HTMLElement {
     const style = document.createElement('style');
     style.textContent = styles;
 
-    //this.palette = this.generatePalette(['red', 'orange', 'yellow', 'lime', 'green', 'cyan', 'blue', 'purple', 'black']);
-
     shadow.appendChild(style);
-    //shadow.appendChild(palette);
   }
 
   connectedCallback() {
@@ -32,8 +29,8 @@ export class PalettePicker extends HTMLElement {
     this.generatePalette();
   }
 
-  attributeChangedCallback(a, b, c) {
-    if(!this.container) {
+  attributeChangedCallback() {
+    if (!this.container) {
       return;
     }
 
@@ -47,21 +44,21 @@ export class PalettePicker extends HTMLElement {
   generatePalette() {
     this.palette = this.getAttribute('palette').split(';');
 
-    for(let i = 0; i < 32; i++) {
+    for (let i = 0; i < 32; i += 1) {
       const colorElement = document.createElement('div');
 
       let color = 'rgba(0,0,0,0)';
-      if(this.palette[i]) {
+      if (this.palette[i]) {
         color = this.palette[i];
 
         colorElement.addEventListener('click', () => {
-          if(this.selectedColorElement) {
+          if (this.selectedColorElement) {
             this.selectedColorElement.classList.remove('selected');
           }
           this.selectedcolor = color;
           this.selectedColorElement = colorElement;
           colorElement.classList.add('selected');
-  
+
           this.dispatchEvent(new CustomEvent('selectcolor', {
             detail: {
               color,
@@ -75,7 +72,7 @@ export class PalettePicker extends HTMLElement {
       colorElement.setAttribute('style', `background: ${color};`);
       colorElement.classList.add('color');
 
-      if(this.selectedcolor === color) {
+      if (this.selectedcolor === color) {
         this.selectedColorElement = colorElement;
         colorElement.classList.add('selected');
       }
@@ -86,7 +83,6 @@ export class PalettePicker extends HTMLElement {
 
   addColor(color) {
     this.palette = this.getAttribute('palette').split(';');
-    
     this.palette = [color, ...this.palette].splice(0, 32);
 
     this.setAttribute('palette', this.palette.join(';'));
