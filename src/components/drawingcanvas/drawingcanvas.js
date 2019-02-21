@@ -3,6 +3,8 @@ import imageURL from '../../../assets/transparency.png'
 
 const styles = fs.readFileSync(`${__dirname}/drawingcanvas.css`); // eslint-disable-line no-path-context, no-path-concat
 
+const mousewheel = navigator.userAgent.includes("Firefox") ? "DOMMouseScroll" : "mousewheel";
+
 export class DrawingPart {
   constructor(width, color) {
     this.width = width;
@@ -95,10 +97,11 @@ export default class DrawingCanvas extends HTMLElement {
         e.preventDefault();
       }
     });
-    canvas.addEventListener('mousewheel', (e) => {
+    canvas.addEventListener(mousewheel, (e) => {
       e.preventDefault();
+      const distance = mousewheel == 'mousewheel' ? e.deltaY / 100 : e.detail / 3;
       const multiplier = e.ctrlKey ? -80 : -4;
-      this.penSize += multiplier * (e.deltaY / 100);
+      this.penSize += multiplier * (distance);
       this.penSize = Math.max(0, this.penSize);
       this.renderDrawing({});
     });
@@ -143,16 +146,6 @@ export default class DrawingCanvas extends HTMLElement {
 
     const style = document.createElement('style');
     style.textContent = styles;
-
-    const button = document.createElement('button');
-    button.textContent = 'Submit';
-    button.addEventListener('click', () => {
-      this.dispatchEvent(new CustomEvent('submitdrawing', {
-        detail: {
-          drawing: canvas.toDataURL(),
-        },
-      }));
-    });
 
     const palette = document.createElement('palette-picker');
     palette.setAttribute('palette', ['red', 'orange', 'yellow', 'lime', 'green', 'cyan', 'blue', 'purple', 'pink', 'black', 'gray', 'white'].join(';'));
@@ -200,7 +193,6 @@ export default class DrawingCanvas extends HTMLElement {
     shadow.appendChild(picker);
     shadow.appendChild(layers);
     shadow.appendChild(canvas);
-    shadow.appendChild(button);
   }
 
   get bgColor() {

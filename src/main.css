@@ -23,7 +23,7 @@ h1 {
     font-family: 'Roboto', sans-serif;
 }
 
-drawing-canvas {
+game-canvas {
     display: block;
     width: 768px;
     margin: auto;
