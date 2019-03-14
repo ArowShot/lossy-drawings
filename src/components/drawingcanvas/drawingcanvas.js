@@ -313,4 +313,8 @@ export default class DrawingCanvas extends HTMLElement {
       target.stroke();
     }
   }
+
+  toDataURL() {
+    return this.canvas.toDataURL();
+  }
 }
